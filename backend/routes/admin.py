@@ -1,11 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
-from app.database import get_db
-from app.models import Participant, Session as TrainingSession, Allocation
+from backend.database import get_db
+from backend.models import Participant, Session as TrainingSession, Allocation
 
-from app.schemas import AllocationCreate, AllocationResult
+from backend.schemas import AllocationCreate, AllocationResult
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -17,9 +16,17 @@ def get_participants(division: str = None, db: Session = Depends(get_db)):
     if division:
         query = query.filter(Participant.div_id == division)
 
-    participants = query.all()
+    return query.all()
 
-    return participants
+
+@router.get("/sessions")
+def get_sessions(db: Session = Depends(get_db)):
+    return db.query(TrainingSession).all()
+
+
+@router.get("/allocations")
+def get_allocations(db: Session = Depends(get_db)):
+    return db.query(Allocation).all()
 
 
 @router.post("/allocate", response_model=AllocationResult)
@@ -30,14 +37,14 @@ def allocate_participant(data: AllocationCreate, db: Session = Depends(get_db)):
     ).first()
 
     if not participant:
-        return AllocationResult(success=False, message="Participant not found")
+        return {"success": False, "message": "Participant not found"}
 
-    session = db.query(TrainingSession).filter(
+    training_session = db.query(TrainingSession).filter(
         TrainingSession.id == data.session_id
     ).first()
 
-    if not session:
-        return AllocationResult(success=False, message="Session not found")
+    if not training_session:
+        return {"success": False, "message": "Session not found"}
 
 
     existing = db.query(Allocation).filter(
@@ -45,21 +52,14 @@ def allocate_participant(data: AllocationCreate, db: Session = Depends(get_db)):
     ).first()
 
     if existing:
-        return AllocationResult(
-            success=False,
-            message="Participant already assigned to a session"
-        )
+        return {"success": False, "message": "Participant already assigned to a session"}
 
     session_count = db.query(Allocation).filter(
         Allocation.sess_id == data.session_id
     ).count()
 
-    if session_count >= session.capacity:
-        return AllocationResult(
-            success=False,
-            message="Session is full"
-        )
-
+    if session_count >= training_session.capacity:
+        return {"success": False, "message": "Session is full"}
 
     division_limits = {
         "A": 8,
@@ -73,11 +73,10 @@ def allocate_participant(data: AllocationCreate, db: Session = Depends(get_db)):
     ).count()
 
     if division_count >= division_limits[participant.div_id]:
-        return AllocationResult(
-            success=False,
-            message=f"Division {participant.div_id} limit reached for this session"
-        )
-
+        return {
+            "success": False,
+            "message": f"Division {participant.div_id} limit reached for this session"
+        }
 
     allocation = Allocation(
         part_id=data.participant_id,
@@ -88,7 +87,7 @@ def allocate_participant(data: AllocationCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(allocation)
 
-    return AllocationResult(
-        success=True,
-        message="Participant successfully allocated"
-    )
+    return {
+        "success": True,
+        "message": "Participant successfully allocated"
+    }
