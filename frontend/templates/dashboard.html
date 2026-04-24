@@ -154,7 +154,6 @@ body {
   overflow-x: hidden;
 }
 
-/* page title */
 .page-title {
   font-size: 22px;
   font-weight: 700;
@@ -586,7 +585,7 @@ footer {
       </div>
     </div>
 
-    <!-- ═══════════════ ADD PARTICIPANT ═══════════════════ -->
+    <!-- ADD PARTICIPANT -->
     <div class="panel active" id="panel-add">
       <div class="section-heading">
         <i class="fa fa-user-plus" style="color:var(--blue)"></i>
@@ -633,7 +632,7 @@ footer {
       </div>
     </div>
 
-    <!-- ═══════════════ VIEW PARTICIPANTS ════════════════ -->
+    <!-- VIEW PARTICIPANTS -->
     <div class="panel" id="panel-view">
       <div class="section-heading">
         <i class="fa fa-users" style="color:var(--blue)"></i>
@@ -682,7 +681,6 @@ footer {
 
 <div id="toast"></div>
 
-<!-- ═══════════════════ JAVASCRIPT ════════════════════════ -->
 <script>
 let divisions = [], sessions = [], participants = [], allocations = [];
 let selDiv = null, selPart = null;
@@ -756,14 +754,15 @@ function confirmDiv() {
   selDiv = divisions.find(d => d.Div_ID == val);
   if (!selDiv) return;
 
-  // Fill participant dropdown — unallocated in this division only
+  // Show ALL unallocated participants — no division filter
+  // Division is assigned at allocation time, not pre-set on participants
   const allocdIds = new Set(allocations.map(a => a.Pat_ID));
-  const eligible  = participants.filter(p => p.Div_ID == selDiv.Div_ID && !allocdIds.has(p.Pat_ID));
+  const eligible  = participants.filter(p => !allocdIds.has(p.Pat_ID));
 
   const ps = document.getElementById('sel-part');
   ps.innerHTML = '<option value="">— Choose a participant —</option>';
   if (!eligible.length) {
-    ps.innerHTML = '<option value="" disabled>All participants in this division are allocated</option>';
+    ps.innerHTML = '<option value="" disabled>All participants have been allocated</option>';
   } else {
     eligible.forEach(p => {
       const o = document.createElement('option');
@@ -799,11 +798,10 @@ function buildSessionCards() {
   row.innerHTML = '';
 
   sessions.forEach(sess => {
-    const divAllocs = allocations.filter(a => {
-      if (a.Sess_ID !== sess.Sess_ID) return false;
-      const p = participants.find(x => x.Pat_ID === a.Pat_ID);
-      return p && p.Div_ID == selDiv.Div_ID;
-    });
+    // Count by Div_ID on allocation (not on participant)
+    const divAllocs = allocations.filter(a =>
+      a.Sess_ID === sess.Sess_ID && a.Div_ID == selDiv.Div_ID
+    );
 
     const used   = divAllocs.length;
     const max    = selDiv.Max_Session;
@@ -855,9 +853,8 @@ async function addToSession(sessId) {
 
   updateStats();
   renderSidebarSummary();
-  buildSessionCards();  // refresh cards
+  buildSessionCards();
 
-  // Disable all other add buttons — participant is now fully allocated
   document.querySelectorAll('.btn-add').forEach(b => {
     b.disabled = true;
     if (b.id !== 'ab-' + sessId) b.textContent = 'Already Allocated';
@@ -892,7 +889,10 @@ function renderTable() {
   const allocIds = new Set(allocations.map(a => a.Pat_ID));
 
   const rows = participants.filter(p => {
-    if (divF   && p.Div_ID != divF) return false;
+    const alloc  = allocations.find(a => a.Pat_ID === p.Pat_ID);
+    const pDivId = alloc ? alloc.Div_ID : null;
+    // Division filter works off the allocation record
+    if (divF && pDivId != divF) return false;
     if (statF === 'allocated'   && !allocIds.has(p.Pat_ID)) return false;
     if (statF === 'unallocated' &&  allocIds.has(p.Pat_ID)) return false;
     const hay = `${p.Name} ${p.Surname} ${p.Email}`.toLowerCase();
@@ -910,7 +910,8 @@ function renderTable() {
     const isAlloc = allocIds.has(p.Pat_ID);
     const alloc   = allocations.find(a => a.Pat_ID === p.Pat_ID);
     const sess    = alloc ? sessions.find(s => s.Sess_ID === alloc.Sess_ID) : null;
-    const div     = divisions.find(d => d.Div_ID === p.Div_ID);
+    // Division comes from allocation, not participant
+    const div     = alloc ? divisions.find(d => d.Div_ID === alloc.Div_ID) : null;
     return `<tr>
       <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:11px">${i+1}</td>
       <td style="font-weight:600">${p.Name}</td>
