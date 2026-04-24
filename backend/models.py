@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
-from app.database import Base
+from backend.database import Base
 
 '''
 This file defines SQLAlchemy models that map to database tables.
