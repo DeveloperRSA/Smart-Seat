@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Derivco — HR Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+/* ── RESET & VARS ────────────────────────────────────────── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { font-size:16px; -webkit-font-smoothing:antialiased; }
+
+:root {
+  --blue:      #00AEEF;
+  --blue-dk:   #0077C8;
+  --blue-pale: #e6f6fd;
+  --navy:      #1C1C3A;
+  --navy2:     #14142b;
+  --white:     #ffffff;
+  --bg:        #f2f7fc;
+  --surface:   #e8f2fb;
+  --border:    #cde3f5;
+  --text:      #1C1C3A;
+  --muted:     #5a6e8c;
+  --success:   #0d9f72;
+  --danger:    #dc3545;
+  --sidebar-w: 230px;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── TOPBAR ──────────────────────────────────────────────── */
+.topbar {
+  height: 58px;
+  background: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.logo svg { width:28px; height:28px; flex-shrink:0; }
+.logo-text {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+.logo-text span { color: var(--blue); }
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.topbar-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--blue-dk);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff;
+}
+
+/* ── BODY LAYOUT ─────────────────────────────────────────── */
+.layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: var(--navy);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  position: sticky;
+  top: 58px;
+  height: calc(100vh - 58px);
+  overflow-y: auto;
+}
+
+.sidebar-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: rgba(255,255,255,0.25);
+  padding: 0 18px;
+  margin-bottom: 6px;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.5);
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background .15s, color .15s;
+  border-left: 3px solid transparent;
+}
+.nav-btn i { width: 16px; text-align: center; font-size: 13px; flex-shrink: 0; }
+.nav-btn:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+.nav-btn.active {
+  background: rgba(0,174,239,0.15);
+  color: var(--blue);
+  border-left-color: var(--blue);
+}
+
+.sidebar-divider { height:1px; background:rgba(255,255,255,0.07); margin:14px 18px; }
+
+/* ── MAIN ────────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  padding: 28px 32px;
+  overflow-x: hidden;
+}
+
+/* page title */
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.02em;
+}
+.page-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 3px;
+  margin-bottom: 24px;
+}
+
+/* ── STAT CARDS ──────────────────────────────────────────── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--blue);
+}
+.stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.stat-val {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.03em;
+  font-family: 'DM Mono', monospace;
+}
+.stat-val em { color: var(--blue); font-style: normal; font-size: 16px; }
+
+/* ── TAB PANELS ──────────────────────────────────────────── */
+.panel { display: none; }
+.panel.active { display: block; }
+
+.section-heading {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--blue);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── ADD FLOW ────────────────────────────────────────────── */
+.flow-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  max-width: 520px;
+  margin-bottom: 20px;
+}
+.step-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--blue-pale);
+  color: var(--blue-dk);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  padding: 3px 10px;
+  border-radius: 100px;
+  margin-bottom: 10px;
+}
+.flow-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 12px;
+}
+
+.form-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  background: var(--white);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%230077C8' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  cursor: pointer;
+  transition: border-color .2s, box-shadow .2s;
+}
+.form-select:focus   { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,174,239,.12); }
+.form-select:disabled { background-color: var(--surface); color: var(--muted); cursor: not-allowed; }
+
+.btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+
+.btn-primary {
+  padding: 10px 22px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background .2s, opacity .2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.btn-primary:hover    { background: var(--blue-dk); }
+.btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+
+.btn-ghost {
+  padding: 10px 18px;
+  background: transparent;
+  color: var(--muted);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: border-color .2s, color .2s;
+}
+.btn-ghost:hover { border-color: var(--blue); color: var(--navy); }
+
+.hidden { display: none !important; }
+
+/* ── SESSION CARDS ───────────────────────────────────────── */
+.sess-heading {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.sess-choosing { color: var(--navy); font-family: 'DM Mono', monospace; }
+
+.session-cards {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.sess-card {
+  flex: 1;
+  min-width: 170px;
+  max-width: 230px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.sess-card:hover { border-color: var(--blue); box-shadow: 0 2px 14px rgba(0,174,239,.1); }
+
+.sess-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.sess-card-title i { color: var(--blue); font-size: 12px; }
+.sess-time { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+.names-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 44px;
+}
+.names-list li {
+  font-size: 12px;
+  background: var(--surface);
+  border-radius: 5px;
+  padding: 3px 8px;
+  color: var(--text);
+  font-weight: 500;
+}
+.names-list .empty {
+  font-size: 11px;
+  color: var(--muted);
+  background: none;
+  font-style: italic;
+}
+
+.cap-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--success);
+}
+.cap-label.full { color: var(--danger); }
+
+.btn-add {
+  padding: 8px 0;
+  width: 100%;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background .2s;
+}
+.btn-add:hover    { background: var(--blue-dk); }
+.btn-add:disabled { background: #cde3f5; color: #7aaabf; cursor: not-allowed; }
+
+/* ── VIEW TABLE ──────────────────────────────────────────── */
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  align-items: center;
+}
+.filter-bar select {
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  background: var(--white);
+  cursor: pointer;
+}
+.filter-bar select:focus { outline: none; border-color: var(--blue); }
+.filter-bar input {
+  flex: 1;
+  min-width: 180px;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  background: var(--white);
+}
+.filter-bar input:focus { outline: none; border-color: var(--blue); }
+
+.table-wrap {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.part-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.part-table thead th {
+  background: var(--navy);
+  color: rgba(255,255,255,0.65);
+  font-weight: 600;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  padding: 11px 16px;
+  text-align: left;
+}
+.part-table tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; }
+.part-table tbody tr:last-child { border-bottom: none; }
+.part-table tbody tr:hover { background: var(--blue-pale); }
+.part-table td { padding: 10px 16px; }
+
+.badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+.b-allocated   { background: #ddf5ff; color: #0077C8; border: 1px solid #a8dcf5; }
+.b-unallocated { background: #fff4e0; color: #a05c00; border: 1px solid #f5d998; }
+.b-div         { background: #eef1ff; color: var(--navy); border: 1px solid #c5ccee; }
+.b-sess        { background: #e8faf4; color: #0a7a54; border: 1px solid #a0dfc8; }
+
+.tbl-empty { text-align: center; padding: 36px; color: var(--muted); font-size: 13px; }
+
+/* ── TOAST ───────────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  background: var(--navy);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  display: none;
+  align-items: center;
+  gap: 9px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.2);
+  z-index: 9999;
+  max-width: 340px;
+  animation: slideup .3s ease;
+}
+#toast.show       { display: flex; }
+#toast.t-success  { border-left: 4px solid var(--success); }
+#toast.t-error    { border-left: 4px solid var(--danger); }
+@keyframes slideup {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+footer {
+  background: var(--navy);
+  color: rgba(255,255,255,.35);
+  font-size: 11px;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+.footer-logo { font-weight: 700; font-size: 13px; color: #fff; }
+.footer-logo span { color: var(--blue); }
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media(max-width:860px) {
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+}
+@media(max-width:640px) {
+  .sidebar { display: none; }
+  .main { padding: 18px 14px; }
+  .session-cards { flex-direction: column; }
+  .sess-card { max-width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="logo">
+    <svg viewBox="0 0 32 32" fill="none">
+      <path d="M6 4h10c7.18 0 12 4.82 12 12s-4.82 12-12 12H6V4z" fill="#00AEEF" opacity=".12"/>
+      <path d="M10 8h6c4.97 0 8 3.03 8 8s-3.03 8-8 8h-6V8z" fill="#00AEEF" opacity=".4"/>
+      <path d="M14 12h3c2.76 0 4 1.24 4 4s-1.24 4-4 4h-3v-8z" fill="#00AEEF"/>
+    </svg>
+    <span class="logo-text">DERIV<span>CO</span></span>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-user">
+      <div class="topbar-avatar">HR</div>
+      <span>hr_admin</span>
+    </div>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div style="padding:0 12px; margin-bottom:14px;">
+      <div class="sidebar-section-label">Training Tools</div>
+      <button class="nav-btn active" id="btn-add"  onclick="switchTab('add')">
+        <i class="fa fa-user-plus"></i> Add Participant
+      </button>
+      <button class="nav-btn"        id="btn-view" onclick="switchTab('view')">
+        <i class="fa fa-users"></i> View Participants
+      </button>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div style="padding:0 12px;">
+      <div class="sidebar-section-label">Session Overview</div>
+      <div id="sidebar-sess-summary" style="padding:4px 6px;">
+        <div style="font-size:11px;color:rgba(255,255,255,.3);padding:4px 12px;">Loading…</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="page-title">HR Dashboard</div>
+    <div class="page-subtitle">Smart Seat Allocation — Training Programme 2026</div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Participants</div>
+        <div class="stat-val" id="s-total">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Allocated</div>
+        <div class="stat-val" id="s-alloc">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Unallocated</div>
+        <div class="stat-val" id="s-unalloc">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Sessions</div>
+        <div class="stat-val">3</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ ADD PARTICIPANT ═══════════════════ -->
+    <div class="panel active" id="panel-add">
+      <div class="section-heading">
+        <i class="fa fa-user-plus" style="color:var(--blue)"></i>
+        Add Participant to Session
+      </div>
+
+      <!-- Step 1 -->
+      <div class="flow-card" id="card-step1">
+        <div class="step-badge"><i class="fa fa-circle-dot"></i> Step 1 of 2</div>
+        <div class="flow-label">Select a Division</div>
+        <select class="form-select" id="sel-div" onchange="onDivChange()">
+          <option value="">— Choose a division —</option>
+        </select>
+        <div class="btn-row">
+          <button class="btn-primary" id="btn-confirm-div" onclick="confirmDiv()" disabled>
+            Confirm <i class="fa fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="flow-card hidden" id="card-step2">
+        <div class="step-badge"><i class="fa fa-circle-dot"></i> Step 2 of 2</div>
+        <div class="flow-label">Select an Unallocated Participant</div>
+        <select class="form-select" id="sel-part" onchange="onPartChange()">
+          <option value="">— Choose a participant —</option>
+        </select>
+        <div class="btn-row">
+          <button class="btn-primary" id="btn-confirm-part" onclick="confirmPart()" disabled>
+            Confirm <i class="fa fa-arrow-right"></i>
+          </button>
+          <button class="btn-ghost" onclick="resetFlow()">
+            &#8592; Start Over
+          </button>
+        </div>
+      </div>
+
+      <!-- Session cards -->
+      <div class="hidden" id="sess-area">
+        <div class="sess-heading">
+          Assign <span class="sess-choosing" id="chosen-name"></span> to a session
+        </div>
+        <div class="session-cards" id="sess-cards"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ VIEW PARTICIPANTS ════════════════ -->
+    <div class="panel" id="panel-view">
+      <div class="section-heading">
+        <i class="fa fa-users" style="color:var(--blue)"></i>
+        All Participants
+      </div>
+
+      <div class="filter-bar">
+        <select id="f-div" onchange="renderTable()">
+          <option value="">All Divisions</option>
+        </select>
+        <select id="f-status" onchange="renderTable()">
+          <option value="">All Statuses</option>
+          <option value="allocated">Allocated</option>
+          <option value="unallocated">Unallocated</option>
+        </select>
+        <input type="text" id="f-search" placeholder="Search name or email…" oninput="renderTable()">
+      </div>
+
+      <div class="table-wrap">
+        <table class="part-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Surname</th>
+              <th>Email</th>
+              <th>Division</th>
+              <th>Session</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-body">
+            <tr><td colspan="7" class="tbl-empty">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  <span class="footer-logo">DERIV<span>CO</span></span>
+  <span>© 2026 Smart Seat Allocation Platform — Test Mode</span>
+</footer>
+
+<div id="toast"></div>
+
+<!-- ═══════════════════ JAVASCRIPT ════════════════════════ -->
+<script>
+let divisions = [], sessions = [], participants = [], allocations = [];
+let selDiv = null, selPart = null;
+
+/* ── BOOT ── */
+document.addEventListener('DOMContentLoaded', async () => {
+  const [d, s, p, a] = await Promise.all([
+    fetch('/api/divisions').then(r => r.json()),
+    fetch('/api/sessions').then(r => r.json()),
+    fetch('/api/participants').then(r => r.json()),
+    fetch('/api/allocations').then(r => r.json()),
+  ]);
+  divisions = d; sessions = s; participants = p; allocations = a;
+
+  buildDivDropdown();
+  buildFilterDropdowns();
+  renderTable();
+  updateStats();
+  renderSidebarSummary();
+});
+
+/* ── STATS ── */
+function updateStats() {
+  document.getElementById('s-total').textContent   = participants.length;
+  document.getElementById('s-alloc').textContent   = allocations.length;
+  document.getElementById('s-unalloc').textContent = participants.length - allocations.length;
+}
+
+/* ── SIDEBAR SESSION SUMMARY ── */
+function renderSidebarSummary() {
+  const wrap = document.getElementById('sidebar-sess-summary');
+  wrap.innerHTML = sessions.map(s => {
+    const count = allocations.filter(a => a.Sess_ID === s.Sess_ID).length;
+    const pct   = Math.round((count / s.Capacity) * 100);
+    const color = count >= s.Capacity ? 'var(--danger)' : 'var(--blue)';
+    return `
+      <div style="padding:6px 12px;">
+        <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:3px">${s.Time_slot}</div>
+        <div style="height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin-bottom:2px">
+          <div style="height:100%;width:${pct}%;background:${color};border-radius:2px;transition:width .4s"></div>
+        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace">${count}/${s.Capacity}</div>
+      </div>`;
+  }).join('');
+}
+
+/* ── TAB SWITCHING ── */
+function switchTab(tab) {
+  ['add','view'].forEach(t => {
+    document.getElementById('panel-' + t).classList.toggle('active', t === tab);
+    document.getElementById('btn-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'view') renderTable();
+}
+
+/* ── ADD FLOW: STEP 1 ── */
+function buildDivDropdown() {
+  const s = document.getElementById('sel-div');
+  s.innerHTML = '<option value="">— Choose a division —</option>';
+  divisions.forEach(d => {
+    const o = document.createElement('option');
+    o.value = d.Div_ID; o.textContent = d.name;
+    s.appendChild(o);
+  });
+}
+function onDivChange() {
+  document.getElementById('btn-confirm-div').disabled = !document.getElementById('sel-div').value;
+}
+function confirmDiv() {
+  const val = document.getElementById('sel-div').value;
+  selDiv = divisions.find(d => d.Div_ID == val);
+  if (!selDiv) return;
+
+  // Fill participant dropdown — unallocated in this division only
+  const allocdIds = new Set(allocations.map(a => a.Pat_ID));
+  const eligible  = participants.filter(p => p.Div_ID == selDiv.Div_ID && !allocdIds.has(p.Pat_ID));
+
+  const ps = document.getElementById('sel-part');
+  ps.innerHTML = '<option value="">— Choose a participant —</option>';
+  if (!eligible.length) {
+    ps.innerHTML = '<option value="" disabled>All participants in this division are allocated</option>';
+  } else {
+    eligible.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p.Pat_ID; o.textContent = p.Name + ' ' + p.Surname;
+      ps.appendChild(o);
+    });
+  }
+
+  document.getElementById('sel-div').disabled = true;
+  document.getElementById('btn-confirm-div').disabled = true;
+  document.getElementById('card-step2').classList.remove('hidden');
+}
+
+/* ── ADD FLOW: STEP 2 ── */
+function onPartChange() {
+  document.getElementById('btn-confirm-part').disabled = !document.getElementById('sel-part').value;
+}
+function confirmPart() {
+  const val = document.getElementById('sel-part').value;
+  selPart = participants.find(p => p.Pat_ID == val);
+  if (!selPart) return;
+
+  document.getElementById('chosen-name').textContent = selPart.Name + ' ' + selPart.Surname;
+  document.getElementById('sel-part').disabled = true;
+  document.getElementById('btn-confirm-part').disabled = true;
+  buildSessionCards();
+  document.getElementById('sess-area').classList.remove('hidden');
+}
+
+/* ── SESSION CARDS ── */
+function buildSessionCards() {
+  const row = document.getElementById('sess-cards');
+  row.innerHTML = '';
+
+  sessions.forEach(sess => {
+    const divAllocs = allocations.filter(a => {
+      if (a.Sess_ID !== sess.Sess_ID) return false;
+      const p = participants.find(x => x.Pat_ID === a.Pat_ID);
+      return p && p.Div_ID == selDiv.Div_ID;
+    });
+
+    const used   = divAllocs.length;
+    const max    = selDiv.Max_Session;
+    const isFull = used >= max;
+
+    const names = divAllocs.map(a => {
+      const p = participants.find(x => x.Pat_ID === a.Pat_ID);
+      return p ? `<li>${p.Name} ${p.Surname}</li>` : '';
+    }).join('') || '<li class="empty">No bookings yet</li>';
+
+    const card = document.createElement('div');
+    card.className = 'sess-card';
+    card.id = 'sc-' + sess.Sess_ID;
+    card.innerHTML = `
+      <div class="sess-card-title">
+        <i class="fa fa-clock"></i> ${sess.Time_slot}
+      </div>
+      <div class="sess-time">${sess.Duration}</div>
+      <ul class="names-list">${names}</ul>
+      <div class="cap-label ${isFull ? 'full' : ''}" id="cap-${sess.Sess_ID}">
+        Participants booked: ${used}/${max}
+      </div>
+      <button class="btn-add" id="ab-${sess.Sess_ID}"
+        onclick="addToSession(${sess.Sess_ID})" ${isFull ? 'disabled' : ''}>
+        ${isFull ? 'Division Limit Reached' : '+ Add to this session'}
+      </button>`;
+    row.appendChild(card);
+  });
+}
+
+/* ── ADD TO SESSION ── */
+async function addToSession(sessId) {
+  const res = await fetch('/api/allocations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ Pat_ID: selPart.Pat_ID, Sess_ID: sessId, Div_ID: selDiv.Div_ID }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    return toast(err.error || 'Allocation failed.', 'error');
+  }
+
+  const alloc = await res.json();
+  allocations.push(alloc);
+
+  const sessName = sessions.find(s => s.Sess_ID === sessId)?.Time_slot || sessId;
+  toast(`${selPart.Name} ${selPart.Surname} added to ${sessName}!`, 'success');
+
+  updateStats();
+  renderSidebarSummary();
+  buildSessionCards();  // refresh cards
+
+  // Disable all other add buttons — participant is now fully allocated
+  document.querySelectorAll('.btn-add').forEach(b => {
+    b.disabled = true;
+    if (b.id !== 'ab-' + sessId) b.textContent = 'Already Allocated';
+  });
+}
+
+/* ── RESET ── */
+function resetFlow() {
+  selDiv = null; selPart = null;
+  document.getElementById('sel-div').disabled  = false;
+  document.getElementById('sel-div').value     = '';
+  document.getElementById('btn-confirm-div').disabled = true;
+  document.getElementById('card-step2').classList.add('hidden');
+  document.getElementById('sess-area').classList.add('hidden');
+  document.getElementById('sess-cards').innerHTML = '';
+}
+
+/* ── VIEW TABLE ── */
+function buildFilterDropdowns() {
+  const fd = document.getElementById('f-div');
+  divisions.forEach(d => {
+    const o = document.createElement('option');
+    o.value = d.Div_ID; o.textContent = d.name;
+    fd.appendChild(o);
+  });
+}
+
+function renderTable() {
+  const divF    = document.getElementById('f-div').value;
+  const statF   = document.getElementById('f-status').value;
+  const search  = document.getElementById('f-search').value.toLowerCase();
+  const allocIds = new Set(allocations.map(a => a.Pat_ID));
+
+  const rows = participants.filter(p => {
+    if (divF   && p.Div_ID != divF) return false;
+    if (statF === 'allocated'   && !allocIds.has(p.Pat_ID)) return false;
+    if (statF === 'unallocated' &&  allocIds.has(p.Pat_ID)) return false;
+    const hay = `${p.Name} ${p.Surname} ${p.Email}`.toLowerCase();
+    if (search && !hay.includes(search)) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('tbl-body');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="tbl-empty">No participants match the filters.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map((p, i) => {
+    const isAlloc = allocIds.has(p.Pat_ID);
+    const alloc   = allocations.find(a => a.Pat_ID === p.Pat_ID);
+    const sess    = alloc ? sessions.find(s => s.Sess_ID === alloc.Sess_ID) : null;
+    const div     = divisions.find(d => d.Div_ID === p.Div_ID);
+    return `<tr>
+      <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:11px">${i+1}</td>
+      <td style="font-weight:600">${p.Name}</td>
+      <td>${p.Surname}</td>
+      <td style="color:var(--muted);font-size:12px">${p.Email}</td>
+      <td><span class="badge b-div">${div ? div.name : '—'}</span></td>
+      <td>${sess ? `<span class="badge b-sess">${sess.Time_slot}</span>` : '<span style="color:var(--muted);font-size:12px">—</span>'}</td>
+      <td><span class="badge ${isAlloc ? 'b-allocated' : 'b-unallocated'}">${isAlloc ? 'Allocated' : 'Unallocated'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── TOAST ── */
+function toast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.className = `show t-${type}`;
+  t.innerHTML = `<i class="fa fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = '', 3500);
+}
+</script>
+</body>
+</html>
