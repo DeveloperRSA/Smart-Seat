@@ -2,16 +2,16 @@
 Smart automatic seat allocation system 
 
 
-#Tech Stack
-##First option
+# Tech Stack
+## First option
 Backend: Python(FastAPI)
 Frontend: Java,HTML,CSS
 Storage:SQL
-##Optimized Stack
+## Optimized Stack
 Frontend:React
 Storage:Firebase
 
-#Authors
+# Authors
 Nomfundo Mtiyane
 Michael
 Daylen
