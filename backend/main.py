@@ -25,6 +25,8 @@ app = FastAPI(
     version="1.0.0"
 )
 
+app.include_router(admin_router)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # allow frontend access (JS/HTML)
