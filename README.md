@@ -1,15 +1,14 @@
 # Smart-Seat
 Smart automatic seat allocation system 
 
+#Problem Statement
+
 
 # Tech Stack
 ## First option
 - Backend: Python(FastAPI)
 - Frontend: JavaScript,HTML,CSS
 - Storage:SQL
-## Optimized Stack
-- Frontend:React
-- Storage:Firebase
 
 # Authors
 - Nomfundo Mtiyane
@@ -19,8 +18,7 @@ Smart automatic seat allocation system
 - Caitlin
 
 # How to Run the Project
-The backend MUST be running for frontend functionality.
-Ensure backend is set up correctly and started before using the UI.
+
 
 ## 1. Clone the Repository (terminal or GitHub desktop)
 
