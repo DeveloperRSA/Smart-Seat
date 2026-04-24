@@ -2,11 +2,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Database engine and base model
-from app.database import engine, Base
-
-# Import models so SQLAlchemy can register them
-import app.models
+from backend.database import engine, Base
+import backend.models
+from backend.routes.admin import router as admin_router
 
 # OS for optional static file serving (not required but kept for flexibility)
 import os
