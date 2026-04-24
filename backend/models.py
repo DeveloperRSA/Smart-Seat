@@ -2,7 +2,6 @@ from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship, Session
 
 from backend.database import Base, engine, SessionLocal
-from backend.models import Participant, Division, Session as TrainingSession, Allocation
 
 '''
 SQLAlchemy models + seed script for Smart Seat Allocation system
